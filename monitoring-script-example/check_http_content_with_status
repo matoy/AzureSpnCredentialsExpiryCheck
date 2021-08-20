@@ -1,0 +1,67 @@
+#!/usr/bin/perl
+
+use strict;
+use Getopt::Std;
+use LWP::UserAgent;
+
+my $plugin_name = 'check_http_content_with_status';
+my $VERSION		= '0.01';
+
+# getopt module config
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
+
+# nagios exit codes
+use constant EXIT_OK		=> 0;
+use constant EXIT_WARNING	=> 1;
+use constant EXIT_CRITICAL	=> 2;
+use constant EXIT_UNKNOWN	=> 3;
+
+# parse cmd opts
+my %opts;
+getopts('vU:t:m:', \%opts);
+$opts{t} = 60 unless (defined $opts{t});
+if (not (defined $opts{U})) {
+	print "ERROR: INVALID USAGE\n";
+	HELP_MESSAGE();
+	exit EXIT_CRITICAL;
+}
+
+my $status = EXIT_OK;
+# set trx timeout 
+my $ua = LWP::UserAgent->new;
+$ua->timeout($opts{t});
+
+# retrieve url
+my $response = $ua->get($opts{U});
+
+if (not $response->is_success) {
+	print "ERROR: CANNOT RETRIEVE URL: ", $response->status_line, "\n";
+	$status = EXIT_CRITICAL;
+} else {
+	my $content = $response->content;
+	if ($content =~ m/CRITICAL/gsm) {
+	    $status = EXIT_CRITICAL;
+	}
+	elsif ($content =~ m/WARNING/gsm) {
+	    $status = EXIT_WARNING;
+	}
+	print $content;
+}
+
+exit $status;
+
+sub HELP_MESSAGE 
+{
+	print <<EOHELP
+	Retrieve an http/s URL and print its output.
+	Returns CRITICAL or WARNING if found, OK otherwise.
+	
+	--help      shows this message
+	--version   shows version information
+
+	-U          URL to retrieve (http or https)
+	-t          Timeout in seconds to wait for the URL to load
+
+EOHELP
+;
+}
