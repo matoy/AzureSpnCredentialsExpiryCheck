@@ -48,7 +48,7 @@ For more serious use, I would advise you host your own zip file so that you woul
   
 * Azure AD PublisherDomain:  
 Publisher domain for your SPN(s), should be your Azure AD tenant primary domain, ex: mycompany.onmicrosoft.com.  
-If you go to "manifest" of any your SPN, this is what you should see for the attribute "publisherDomain".  
+If you go to the "manifest" section of any your SPN in Azure portal, this is what you should see for the attribute "publisherDomain".  
   
 * Signature:  
 When this function will be called by your monitoring system, you likely might forget about it.  
