@@ -3,7 +3,7 @@
 ## Why this function app ?
 Azure Active Directory provides Service Principal Names (SPNs) to delegate Identity and Access Management.  
 These SPNs have secrets and/or certificates that expire and people in your company may forget to renew them.  
-Azure AD doesn't provide any feature to monitor SPNs secrets and certificates expiry yet (at the time of this writing).  You have hundreds of accounts with potentially several secrets for each account, people leaving the company and others coming, it's pretty sure that one day you'll have a secret used on an production application getting expired and that will make your app fail.  
+Azure AD doesn't provide any feature to monitor SPNs secrets and certificates expiry yet (at the time of this writing).  You have hundreds of accounts with potentially several secrets for each account, people leaving the company and others coming, it's pretty sure that one day you'll have a secret used on a production application getting expired and that will make your app fail.  
   
 This function app automatically gathers and outputs secrets and certificates that will expires soon by calling Azure API.  
   
