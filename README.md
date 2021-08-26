@@ -57,6 +57,11 @@ The signature output will act a reminder since you'll get it in the results to y
 When deployment is done, you can get your Azure function's URL in the output variables.  
 Trigger it manually in your favorite browser and eventually look at the logs in the function.  
 After you execute the function for the first time, it might (will) need 5-10 minutes before it works because it has to install Az module. You even might get an HTTP 500 error. Give the function some time to initialize, re-execute it again if necessary and be patient, it will work.  
+  
+Even after that, you might experience issue if Azure takes time to resolve your newly created keyvault:  
+![alt text](https://github.com/matoy/AzureSpnCredentialsExpiryCheck/blob/main/img/kv-down.png?raw=true)  
+Wait a short time and then restart your Azure function, your should have something like:  
+![alt text](https://github.com/matoy/AzureSpnCredentialsExpiryCheck/blob/main/img/kv-up.png?raw=true)  
 </br>
 </br>
 
