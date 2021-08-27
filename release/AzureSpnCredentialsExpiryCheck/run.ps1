@@ -31,7 +31,7 @@ function CheckCred {
 		$type
     )
 
-	if ((Get-Date).AddDays($critical) -gt $cred.endDateTime) {
+	if ((Get-Date).AddDays($critical) -ge $cred.endDateTime) {
 		$uri = "https://graph.microsoft.com/v1.0/applications/$($spn.id)/owners"
 		$owner = (Invoke-RestMethod -Method Get -Uri $uri -Headers $headers).value.userPrincipalName
 		if (!$owner) {$owner = "???"}
