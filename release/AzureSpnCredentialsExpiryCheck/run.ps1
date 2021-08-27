@@ -8,7 +8,7 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 
 #####
 #
-# TT 20210406 AzureSpnCredentialsExpiryCheck-HTTP
+# TT 20210406 AzureSpnCredentialsExpiryCheck
 # This script is executed by an Azure Function App
 # It checks the expiry of Azure AD SPNs secrets & certificates
 # It can be triggered by any monitoring system to get the results and status
@@ -39,6 +39,9 @@ function CheckCred {
 		if ((Get-Date) -gt $cred.endDateTime) {
 			return "CRITICAL: $type has expired on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 		}
+        elseif ((Get-Date).ToString("yyyy-MM-dd") -eq $expiryDate) {
+            return "CRITICAL: $type expires today for SPN $($spn.displayName) (owned by $owner)`n"
+        }
 		else {
 			 return "CRITICAL: $type will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 		}
@@ -51,6 +54,36 @@ function CheckCred {
 		return "WARNING: $type will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 	}
 	return $null
+}
+function Send-EmailWithSendGrid {
+     Param
+    (
+        [Parameter(Mandatory=$true)]
+        [string] $From,
+        [Parameter(Mandatory=$true)]
+        [String] $To,
+        [Parameter(Mandatory=$true)]
+        [string] $ApiKey,
+        [Parameter(Mandatory=$true)]
+        [string] $Subject,
+        [Parameter(Mandatory=$true)]
+        [string] $Body
+    )
+
+    $headers = @{}
+    $headers.Add("Authorization","Bearer $apiKey")
+    $headers.Add("Content-Type", "application/json")
+    $body_regex    = [Regex]::new("^[\x00-\x7F]*")
+    # avoid sendgrid message:"Invalid UTF8"
+    $Body = [regex]::match($Body, $body_regex).Value
+    $jsonRequest = [ordered]@{
+                            personalizations= @(@{to = @(@{email =  "$To"})
+                                subject = "$SubJect" })
+                                from = @{email = "$From"}
+                                content = @( @{ type = "text/plain"
+                                            value = "$Body" }
+                                )} | ConvertTo-Json -Depth 10
+    Invoke-RestMethod   -Uri "https://api.sendgrid.com/v3/mail/send" -Method Post -Headers $headers -Body $jsonRequest
 }
 
 $warning = [int] $Request.Query.Warning
@@ -69,7 +102,13 @@ $applicationId = $env:AzureSpnCredentialsExpiryCheckApplicationID
 $password = $env:AzureSpnCredentialsExpiryCheckSecret
 $publisherDomain = $env:AzureSpnCredentialsExpiryCheckPublisherDomain
 $signature = $env:Signature
+$from = $env:AzureSpnCredentialsExpiryCheckMailFrom
+$to = $env:AzureSpnCredentialsExpiryCheckMailTo
+$subject = $env:AzureSpnCredentialsExpiryCheckMailSubject
+$sendgridApiKey = $env:AzureSpnCredentialsExpiryCheckSendgridKey
+$mailEnabled = $env:AzureSpnCredentialsExpiryCheckMailEnabled
 $out = ""
+$outMail = ""
 $alerts = @{}
 $warningCount = 0
 $criticalCount = 0
@@ -132,11 +171,19 @@ foreach ($alert in ($alerts.GetEnumerator() | Sort-Object -Property name)) {
 	if ($alert.value -match "WARNING") {
 		$warningCount++
 	}
+    if ($alert.value -match "expires today") {
+        $outMail += $alert.value
+    }
 }
 
 if ($spnsFiltered.count -eq 0) {
 	$warningCount++
 	$body += "No SPN found, permission might be missing on used SPN`n"
+}
+
+if ($mailEnabled -eq "true" -and $outMail -ne "") {
+    $outMail = "Dear OPS team,`n`nPlease know that secret/cert expires today for following SPN(s):`n$outMail`n-- `n$signature"
+    Send-EmailWithSendGrid -from $from -to $to -ApiKey $sendgridApiKey -Body $outMail -Subject $subject
 }
 
 # add ending status and signature to results
