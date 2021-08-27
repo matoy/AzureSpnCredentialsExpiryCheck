@@ -50,6 +50,18 @@ For more serious use, I would advise you host your own zip file so that you woul
 Publisher domain for your SPN(s), should be your Azure AD tenant primary domain, ex: mycompany.onmicrosoft.com.  
 If you go to the "manifest" section of any your SPN in Azure portal, this is what you should see for the attribute "publisherDomain".  
   
+* Mail enabled:  
+True if you want to enable email notification the day secret/cert expires.  
+  
+* Mail subject:  
+Customize subject of emails you'll receive.  
+  
+* Mail from / to:  
+Seems pretty obvious.  
+  
+* Sendgrid API key:  
+Sendgrid is used to send emails and a valid API key must be provided. Since the API key will be stored in the keyvault, even is you disable this feature, don't let this field empty because that would cause the build with ARM template to fail (a secret cannot have an empty value).  
+  
 * Signature:  
 When this function will be called by your monitoring system, you likely might forget about it.  
 The signature output will act a reminder since you'll get it in the results to your monitoring system.  
