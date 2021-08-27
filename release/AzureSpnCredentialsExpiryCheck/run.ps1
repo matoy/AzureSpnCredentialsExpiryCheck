@@ -8,7 +8,7 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 
 #####
 #
-# TT 20210406 AzureSpnCredentialsExpiryCheck-HTTP
+# TT 20210406 AzureSpnCredentialsExpiryCheck
 # This script is executed by an Azure Function App
 # It checks the expiry of Azure AD SPNs secrets & certificates
 # It can be triggered by any monitoring system to get the results and status
@@ -39,6 +39,9 @@ function CheckCred {
 		if ((Get-Date) -gt $cred.endDateTime) {
 			return "CRITICAL: $type has expired on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 		}
+        elseif ((Get-Date).ToString("yyyy-MM-dd") -eq $expiryDate) {
+            return "CRITICAL: $type expires today for SPN $($spn.displayName) (owned by $owner)`n"
+        }
 		else {
 			 return "CRITICAL: $type will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 		}
@@ -168,7 +171,7 @@ foreach ($alert in ($alerts.GetEnumerator() | Sort-Object -Property name)) {
 	if ($alert.value -match "WARNING") {
 		$warningCount++
 	}
-    if ($alert.value -match "has expired") {
+    if ($alert.value -match "expires today") {
         $outMail += $alert.value
     }
 }
@@ -178,8 +181,8 @@ if ($spnsFiltered.count -eq 0) {
 	$body += "No SPN found, permission might be missing on used SPN`n"
 }
 
-if ($mailEnabled -eq "true") {
-    $outMail = "Dear OPS team,`n`nPlease know that secret/cert has expired today for SPN:`n$outMail`n-- `n$signature"
+if ($mailEnabled -eq "true" -and $outMail -ne "") {
+    $outMail = "Dear OPS team,`n`nPlease know that secret/cert expires today for following SPN(s):`n$outMail`n-- `n$signature"
     Send-EmailWithSendGrid -from $from -to $to -ApiKey $sendgridApiKey -Body $outMail -Subject $subject
 }
 
