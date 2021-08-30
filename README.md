@@ -45,7 +45,8 @@ Secret of the account used to retrieve subscriptions information.
 * Zip Release URL:  
 For testing, you can leave it like it.  
 For more serious use, I would advise you host your own zip file so that you wouldn't be subject to release changes done in this repository.  
-  
+See below for more details.  
+
 * Azure AD PublisherDomain:  
 Publisher domain for your SPN(s), should be your Azure AD tenant primary domain, ex: mycompany.onmicrosoft.com.  
 If you go to the "manifest" section of any your SPN in Azure portal, this is what you should see for the attribute "publisherDomain".  
@@ -92,4 +93,11 @@ Be sure to have an appropriate timeout (60s or more) because if you have many su
   
 This is an example of what you'd get in Centreon:  
 ![alt text](https://github.com/matoy/AzureSpnCredentialsExpiryCheck/blob/main/img/screenshot2.png?raw=true)  
-  
+</br>
+</br>
+
+## How to stop relying on this repository's zip  
+To make your function to stop relying on this repo's zip and become independant, follow these steps:  
+* remove zipReleaseURL app setting
+* in "App files" section, edit "requirements.psd1" and uncomment the line: 'Az' = '6.*'
+* in "Functions" section, add a new function called "AzureSpnCredentialsExpiryCheck" and paste in it the content of the file release/AzureSpnCredentialsExpiryCheck/run.ps1 in this repository
