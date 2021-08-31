@@ -37,13 +37,13 @@ function CheckCred {
 		if (!$owner) {$owner = "???"}
 		$expiryDate = $cred.endDateTime.ToString("yyyy-MM-dd")
 		if ((Get-Date) -gt $cred.endDateTime) {
-			return "CRITICAL: $type has expired on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
+			return "CRITICAL: $type '$($cred.displayName)' has expired on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 		}
         elseif ((Get-Date).ToString("yyyy-MM-dd") -eq $expiryDate) {
-            return "CRITICAL: $type expires today for SPN $($spn.displayName) (owned by $owner)`n"
+            return "CRITICAL: $type '$($cred.displayName)' expires today for SPN $($spn.displayName) (owned by $owner)`n"
         }
 		else {
-			 return "CRITICAL: $type will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
+			 return "CRITICAL: $type '$($cred.displayName)' will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 		}
 	}
 	elseif ((Get-Date).AddDays($warning) -gt $cred.endDateTime) {
@@ -51,7 +51,7 @@ function CheckCred {
 		$owner = (Invoke-RestMethod -Method Get -Uri $uri -Headers $headers).value.userPrincipalName
 		if (!$owner) {$owner = "???"}
 		$expiryDate = $cred.endDateTime.ToString("yyyy-MM-dd")
-		return "WARNING: $type will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
+		return "WARNING: $type '$($cred.displayName)' will expire on $expiryDate for SPN $($spn.displayName) (owned by $owner)`n"
 	}
 	return $null
 }
