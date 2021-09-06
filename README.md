@@ -57,6 +57,9 @@ True if you want to enable email notification the day secret/cert expires.
 * Mail subject:  
 Customize subject of emails you'll receive.  
   
+* Mail introduction:  
+Customize introduction message in emails.  
+  
 * Mail from / to:  
 Seems pretty obvious.  
   
