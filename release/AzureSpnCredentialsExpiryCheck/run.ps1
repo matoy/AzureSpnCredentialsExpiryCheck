@@ -105,6 +105,7 @@ $signature = $env:Signature
 $from = $env:AzureSpnCredentialsExpiryCheckMailFrom
 $to = $env:AzureSpnCredentialsExpiryCheckMailTo
 $subject = $env:AzureSpnCredentialsExpiryCheckMailSubject
+$intro = $env:AzureSpnCredentialsExpiryCheckMailIntroduction
 $sendgridApiKey = $env:AzureSpnCredentialsExpiryCheckSendgridKey
 $mailEnabled = $env:AzureSpnCredentialsExpiryCheckMailEnabled
 $out = ""
@@ -182,7 +183,7 @@ if ($spnsFiltered.count -eq 0) {
 }
 
 if ($mailEnabled -eq "true" -and $outMail -ne "") {
-    $outMail = "Dear OPS team,`n`nPlease know that secret/cert expires today for following SPN(s):`n$outMail`n-- `n$signature"
+    $outMail = "$intro`n$outMail`n-- `n$signature"
     Send-EmailWithSendGrid -from $from -to $to -ApiKey $sendgridApiKey -Body $outMail -Subject $subject
 }
 
