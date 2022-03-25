@@ -184,7 +184,10 @@ if ($spnsFiltered.count -eq 0) {
 
 if ($mailEnabled -eq "true" -and $outMail -ne "") {
     $outMail = "$intro`n$outMail`n-- `n$signature"
-    Send-EmailWithSendGrid -from $from -to $to -ApiKey $sendgridApiKey -Body $outMail -Subject $subject
+	$toTab = $to -split "[,;]"
+	foreach ($toDest in $toTab) {
+		Send-EmailWithSendGrid -from $from -to $toDest -ApiKey $sendgridApiKey -Body $outMail -Subject $subject
+	}
 }
 
 # add ending status and signature to results
